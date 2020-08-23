@@ -15,7 +15,7 @@ server.get("/", (req, res) =>
             <html>
               <head></head>
               <body>
-                <div id="root">test!</div>
+                <div id="root" />
                 <script src="bundle.js"></script>
               </body>
             </html>
