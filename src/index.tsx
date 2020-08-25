@@ -1,11 +1,16 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import WelcomeCard from "./components/welcome-card";
+import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
+import Container from "./container/container";
+
+const client = new ApolloClient({
+  uri: "/graphql",
+  cache: new InMemoryCache(),
+});
 
 ReactDOM.render(
-  <WelcomeCard
-    title={"react starter app"}
-    paragraph={"todo: add graphQL next"}
-  />,
+  <ApolloProvider client={client}>
+    <Container />
+  </ApolloProvider>,
   document.getElementById("root")
 );

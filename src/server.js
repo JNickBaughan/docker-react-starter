@@ -24,7 +24,7 @@ const typeDefs = `
 const resolvers = {
   Query: {
     getTitle: () => "react starter app",
-    getNext: () => "todo: add apollo client",
+    getNext: () => "todo: add postGres Database",
   },
 };
 
