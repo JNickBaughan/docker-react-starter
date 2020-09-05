@@ -2,6 +2,9 @@ let express = require("express");
 let bodyParser = require("body-parser");
 const { graphqlExpress, graphiqlExpress } = require("apollo-server-express");
 const { makeExecutableSchema } = require("graphql-tools");
+const { Pool } = require("pg");
+const keys = require("../keys");
+
 let PORT = 3000;
 let server = express();
 const middlewares = [
@@ -9,6 +12,24 @@ const middlewares = [
   bodyParser.json(),
   bodyParser.urlencoded({ extended: true }),
 ];
+
+const pgClient = new Pool({
+  user: keys.pgUser,
+  host: keys.pgHost,
+  database: keys.pgDatabase,
+  password: keys.pgPassword,
+  port: keys.pgPort,
+});
+
+pgClient.on("connect", () => {
+  pgClient
+    .query("CREATE TABLE IF NOT EXISTS todos (todo CHAR(50))")
+    .catch((err) => console.log(err));
+});
+
+pgClient.query("INSERT INTO todos(todo) VALUES($1)", [
+  "todo: add pgClient to graphQL context",
+]);
 
 server.use(...middlewares);
 
@@ -24,7 +45,11 @@ const typeDefs = `
 const resolvers = {
   Query: {
     getTitle: () => "react starter app",
-    getNext: () => "todo: add postGres Database",
+    getNext: async () => {
+      const values = await pgClient.query("SELECT * from todos");
+      const index = values.rows.length - 1;
+      return values.rows[index].todo;
+    },
   },
 };
 
