@@ -27,9 +27,7 @@ pgClient.on("connect", () => {
     .catch((err) => console.log(err));
 });
 
-pgClient.query("INSERT INTO todos(todo) VALUES($1)", [
-  "todo: add pgClient to graphQL context",
-]);
+pgClient.query("INSERT INTO todos(todo) VALUES($1)", ["todo: refactor"]);
 
 server.use(...middlewares);
 
@@ -45,8 +43,8 @@ const typeDefs = `
 const resolvers = {
   Query: {
     getTitle: () => "react starter app",
-    getNext: async () => {
-      const values = await pgClient.query("SELECT * from todos");
+    getNext: async (_, __, context) => {
+      const values = await context.pgClient.query("SELECT * from todos");
       const index = values.rows.length - 1;
       return values.rows[index].todo;
     },
@@ -60,7 +58,11 @@ const schema = makeExecutableSchema({
 });
 
 // The GraphQL endpoint
-server.use("/graphql", bodyParser.json(), graphqlExpress({ schema }));
+server.use(
+  "/graphql",
+  bodyParser.json(),
+  graphqlExpress({ schema, context: { pgClient } })
+);
 
 // GraphiQL, a visual editor for queries
 server.use("/graphiql", graphiqlExpress({ endpointURL: "/graphql" }));
